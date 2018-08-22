@@ -11,5 +11,9 @@ namespace HttpClientWrapper.Interfaces
         Task<T> PutAsync<T>(string apiUri, object variable);
 
         Task<T> DeleteAsync<T>(string apiUri);
+
+        Task<T> GetAsyncByHttpRequest<T>(string apiUrl);
+
+        Task<T> PostAsyncByHttpRequest<T>(string apiUri, object variable);
     }
 }

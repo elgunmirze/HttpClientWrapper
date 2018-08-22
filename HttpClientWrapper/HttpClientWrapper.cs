@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
+using HttpClientWrapper.Exceptions;
 using HttpClientWrapper.Interfaces;
 using Newtonsoft.Json;
 
@@ -32,11 +34,14 @@ namespace HttpClientWrapper
 
             response.EnsureSuccessStatusCode();
 
+            if (!response.IsSuccessStatusCode) throw HttpClientExceptions.ThrowException(response);
+
             string content = await response.Content.ReadAsStringAsync();
 
             var result = JsonConvert.DeserializeObject<T>(content);
 
             return result;
+
         }
 
         public async Task<T> PostAsync<T>(string apiUri, object variable)
@@ -45,9 +50,12 @@ namespace HttpClientWrapper
 
             response.EnsureSuccessStatusCode();
 
+            if (!response.IsSuccessStatusCode) throw HttpClientExceptions.ThrowException(response);
+
             T result = await response.Content.ReadAsAsync<T>();
 
             return result;
+
         }
 
         public async Task<T> PutAsync<T>(string apiUri, object variable)
@@ -56,9 +64,12 @@ namespace HttpClientWrapper
 
             response.EnsureSuccessStatusCode();
 
+            if (!response.IsSuccessStatusCode) throw HttpClientExceptions.ThrowException(response);
+
             T result = await response.Content.ReadAsAsync<T>();
 
             return result;
+
         }
 
         public async Task<T> DeleteAsync<T>(string apiUri)
@@ -66,6 +77,42 @@ namespace HttpClientWrapper
             HttpResponseMessage response = await _client.DeleteAsync(apiUri);
 
             response.EnsureSuccessStatusCode();
+
+            if (!response.IsSuccessStatusCode) throw HttpClientExceptions.ThrowException(response);
+
+            T result = await response.Content.ReadAsAsync<T>();
+
+            return result;
+
+        }
+
+        public async Task<T> GetAsyncByHttpRequest<T>(string apiUrl)
+        {
+            var request = new HttpRequestMessage(HttpMethod.Get, new Uri(apiUrl));
+
+            HttpResponseMessage response = await _client.SendAsync(request);
+
+            response.EnsureSuccessStatusCode();
+
+            if (!response.IsSuccessStatusCode) throw HttpClientExceptions.ThrowException(response);
+
+            T result = await response.Content.ReadAsAsync<T>();
+
+            return result;
+        }
+
+        public async Task<T> PostAsyncByHttpRequest<T>(string apiUri, object variable)
+        {
+            var request = new HttpRequestMessage(HttpMethod.Post, new Uri(apiUri))
+            {
+                Content = new StringContent(JsonConvert.SerializeObject(variable), Encoding.UTF8, "application/json")
+            };
+
+            HttpResponseMessage response = await _client.SendAsync(request);
+
+            response.EnsureSuccessStatusCode();
+
+            if (!response.IsSuccessStatusCode) throw HttpClientExceptions.ThrowException(response);
 
             T result = await response.Content.ReadAsAsync<T>();
 
